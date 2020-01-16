@@ -7,6 +7,7 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
+// DB wrap badger.DB
 type DB struct {
 	db *badger.DB
 }
@@ -20,15 +21,18 @@ func New(path string) (*DB, error) {
 	return &DB{db}, nil
 }
 
+// Close db.
 func (db *DB) Close() error {
 	return db.db.Close()
 }
 
-func (db *DB) Server() *Server {
-	return NewServer(db)
-}
-
+// ErrKeyNotFound reprents error that key not found.
 var ErrKeyNotFound = errors.New("key not found")
+
+// Source get inner db.
+func (db *DB) Source() *badger.DB {
+	return db.db
+}
 
 // Get by key.
 func (db *DB) Get(key string) ([]byte, error) {

@@ -11,22 +11,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Server represents a inner http server of DB.
 type Server struct {
 	db  *DB
 	r   *gin.Engine
 	srv *http.Server
 }
 
-func NewServer(db *DB) *Server {
-	r := gin.Default()
+// LoadRouter load default routers.
+func (db *DB) LoadRouter(r *gin.Engine) {
 	r.GET("/items/:key/", getKey(db))
 	r.POST("/items/", setKey(db))
 	r.DELETE("/items/:key/", deleteKey(db))
 	r.GET("/keys/", listKeys(db))
+}
+
+// Server get Server from db.
+func (db *DB) Server() *Server {
+	r := gin.Default()
+	db.LoadRouter(r)
 
 	return &Server{db: db, r: r}
 }
 
+// Run server.
 func (s *Server) Run(addr string) {
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -41,6 +49,7 @@ func (s *Server) Run(addr string) {
 	}()
 }
 
+// Close server.
 func (s *Server) Close(ctx context.Context) {
 	if err := s.srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
